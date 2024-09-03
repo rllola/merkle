@@ -1,7 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use hmac_sha256::Hash;
 use merkle::merkle::MerkleTree;
-use rand::prelude::*;
 
 fn bench_create_merkle_tree(c: &mut Criterion) {
     c.bench_function("create merkle tree", |b| b.iter(|| {
@@ -28,9 +27,11 @@ fn bench_generate_proof(c: &mut Criterion) {
             hashes.push(hash);
         }
 
-        // generate a number to pick which hash index we are generating the proof for
-        let mut rng = rand::thread_rng();
-        let i: usize = rng.gen::<usize>() % contents.len();
+        // // generate a number to pick which hash index we are generating the proof for
+        // let mut rng = rand::thread_rng();
+        // let i: usize = rng.gen::<usize>() % contents.len();
+
+        let i = contents.len() / 2;
 
         let hash = hashes[i].clone();
 
