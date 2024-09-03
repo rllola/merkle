@@ -3,9 +3,16 @@ name = "merkle"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 hmac-sha256 = "1.1.7"
 hex = "0.4.3"
 sha2 = "0.10.8"
+
+[dev-dependencies]
+criterion = "0.5"
+rand = "0.8.5"
+
+[[bench]]
+name = "merkle"
+path = "benches/merkle.rs"
+harness = false

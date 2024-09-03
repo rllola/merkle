@@ -1,5 +1,4 @@
 use hmac_sha256::Hash;
-use std::borrow::Borrow;
 use std::error::Error;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -55,8 +54,6 @@ impl MerkleTree {
 
             nodes.push(n);
         }
-
-        dbg!(nodes.len());
 
         Self::build_tree(&nodes)
     }
@@ -166,7 +163,7 @@ impl Node {
 
     pub fn get_right(&self) -> Option<&Self> {
         match self {
-            Node::Node{ right, ..} => Some(right),
+            Node::Node{ right, ..} => { if let Node::Empty = right.as_ref() { None } else { Some(right) }},
             _ => None,
         }
     }
@@ -208,7 +205,6 @@ mod tests {
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
             let hash = Hash::hash(data.as_bytes());
-            dbg!(hex::encode(hash));
             hashes.push(hash);
         }
 
@@ -381,5 +377,4 @@ mod tests {
         
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
-
 }
