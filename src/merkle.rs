@@ -1,6 +1,6 @@
 use hmac_sha256::Hash;
-use std::error::Error;
 use std::cell::RefCell;
+use std::error::Error;
 use std::rc::Rc;
 use std::rc::Weak;
 
@@ -11,10 +11,15 @@ pub struct MerkleTree {
 
 impl MerkleTree {
     pub fn new(leaves: Vec<[u8; 32]>) -> Self {
-
-        let nodes: Vec<Rc<Node>> = leaves.into_iter().map(|hash| {
-            Rc::new(Node::Leaf { hash, parent: RefCell::new(Weak::new()) })
-        }).collect();
+        let nodes: Vec<Rc<Node>> = leaves
+            .into_iter()
+            .map(|hash| {
+                Rc::new(Node::Leaf {
+                    hash,
+                    parent: RefCell::new(Weak::new()),
+                })
+            })
+            .collect();
 
         let mut tree = Self::build_tree(&nodes);
         tree.leaves.extend(nodes);
@@ -22,34 +27,49 @@ impl MerkleTree {
         return tree;
     }
 
-    fn build_tree(items: &Vec<Rc<Node>>) -> Self {        
+    fn build_tree(items: &Vec<Rc<Node>>) -> Self {
         if items.len() == 1 {
-            return Self { root: Rc::clone(&items[0]), leaves: vec![] };
+            return Self {
+                root: Rc::clone(&items[0]),
+                leaves: vec![],
+            };
         }
 
         let mut nodes: Vec<Rc<Node>> = vec![];
         for i in (0..items.len()).step_by(2) {
             let n: Rc<Node>;
-            if i+1 >= items.len() {
+            if i + 1 >= items.len() {
                 // if we have an odd number of nodes we duplicate the last one to calculate the hash
-                let hash = Hash::hash(&[items[i].hash().to_vec(), items[i].hash().to_vec()].concat());
+                let hash =
+                    Hash::hash(&[items[i].hash().to_vec(), items[i].hash().to_vec()].concat());
                 let left = Rc::clone(&items[i]);
                 let right = Rc::new(Node::Empty);
 
-                n = Rc::new(Node::Node { hash, parent: RefCell::new(Weak::new()), left, right });
+                n = Rc::new(Node::Node {
+                    hash,
+                    parent: RefCell::new(Weak::new()),
+                    left,
+                    right,
+                });
 
                 // update parent nodes
                 items[i].set_parent(&n);
             } else {
-                let hash = Hash::hash(&[items[i].hash().to_vec(), items[i+1].hash().to_vec()].concat());
+                let hash =
+                    Hash::hash(&[items[i].hash().to_vec(), items[i + 1].hash().to_vec()].concat());
                 let left = Rc::clone(&items[i]);
-                let right = Rc::clone(&items[i+1]);
+                let right = Rc::clone(&items[i + 1]);
 
-                n = Rc::new(Node::Node { hash, parent: RefCell::new(Weak::new()), left, right });
+                n = Rc::new(Node::Node {
+                    hash,
+                    parent: RefCell::new(Weak::new()),
+                    left,
+                    right,
+                });
 
                 // update parent nodes
                 items[i].set_parent(&n);
-                items[i+1].set_parent(&n);
+                items[i + 1].set_parent(&n);
             }
 
             nodes.push(n);
@@ -66,9 +86,12 @@ impl MerkleTree {
         self.root.as_ref()
     }
 
-    pub fn generate_proofs(&self, hash: [u8; 32]) -> Result<Vec<([u8;32], u8)>, Box<dyn Error + 'static>> {
+    pub fn generate_proofs(
+        &self,
+        hash: [u8; 32],
+    ) -> Result<Vec<([u8; 32], u8)>, Box<dyn Error + 'static>> {
         // lookup for our leaf
-        let mut n: &Node = self.root();       
+        let mut n: &Node = self.root();
         for l in &self.leaves {
             if l.hash() == &hash {
                 n = &l;
@@ -76,19 +99,19 @@ impl MerkleTree {
             }
         }
 
-        let leaf_proof: Vec<([u8;32], u8)> = vec![];
+        let leaf_proof: Vec<([u8; 32], u8)> = vec![];
         let proofs = Self::gen_proof(&n, leaf_proof);
 
         Ok(proofs)
     }
 
-    fn gen_proof(n: &Node, proofs: Vec<([u8;32], u8)>) -> Vec<([u8;32], u8)> {
+    fn gen_proof(n: &Node, proofs: Vec<([u8; 32], u8)>) -> Vec<([u8; 32], u8)> {
         let mut new_proof: Vec<([u8; 32], u8)> = vec![];
         if let None = n.parent() {
             return proofs;
         }
 
-        if let Node::Node {hash, ..} | Node::Leaf {hash, ..} = n {
+        if let Node::Node { hash, .. } | Node::Leaf { hash, .. } = n {
             let p = n.parent().unwrap(); // unwrap here is not great neither but should work fine.
             let pleft = p.get_left().unwrap(); // We should always have left
 
@@ -99,14 +122,14 @@ impl MerkleTree {
             } else {
                 new_proof.push((pleft.hash().clone(), 0));
             }
-        
+
             return Self::gen_proof(p.as_ref(), [proofs, new_proof].concat());
         }
 
         return vec![];
     }
 
-    pub fn verify(data: Vec<u8>, proofs: Vec<([u8;32], u8)>) -> [u8; 32] {
+    pub fn verify(data: Vec<u8>, proofs: Vec<([u8; 32], u8)>) -> [u8; 32] {
         let mut hash = Hash::hash(&data);
 
         for proof in proofs {
@@ -124,7 +147,7 @@ impl MerkleTree {
 #[derive(Debug, Clone)]
 pub enum Node {
     Empty,
-    Node { 
+    Node {
         hash: [u8; 32],
         parent: RefCell<Weak<Node>>,
         left: Rc<Node>,
@@ -139,38 +162,44 @@ pub enum Node {
 impl Node {
     pub fn hash(&self) -> &[u8; 32] {
         match self {
-            Node::Node { hash, ..} => hash,
-            Node::Leaf { hash, ..} => hash,
+            Node::Node { hash, .. } => hash,
+            Node::Leaf { hash, .. } => hash,
             _ => &[0u8; 32],
         }
     }
 
     pub fn set_parent(&self, p: &Rc<Node>) {
         match self {
-            Node::Node { parent, ..} => *parent.borrow_mut() = Rc::downgrade(p), // need to fix this unwrap because we can't set parrent on root.
-            Node::Leaf { parent, ..} => *parent.borrow_mut() = Rc::downgrade(p),
+            Node::Node { parent, .. } => *parent.borrow_mut() = Rc::downgrade(p), // need to fix this unwrap because we can't set parrent on root.
+            Node::Leaf { parent, .. } => *parent.borrow_mut() = Rc::downgrade(p),
             _ => panic!("Empty and root doesnt have a parent"),
         };
     }
 
     pub fn get_left(&self) -> Option<&Self> {
         match self {
-            Node::Node{ left, ..} => Some(left),
+            Node::Node { left, .. } => Some(left),
             _ => None,
         }
     }
 
     pub fn get_right(&self) -> Option<&Self> {
         match self {
-            Node::Node{ right, ..} => { if let Node::Empty = right.as_ref() { None } else { Some(right) }},
+            Node::Node { right, .. } => {
+                if let Node::Empty = right.as_ref() {
+                    None
+                } else {
+                    Some(right)
+                }
+            }
             _ => None,
         }
     }
 
     pub fn parent(&self) -> Option<Rc<Self>> {
         match self {
-            Node::Node{ parent, ..} => parent.borrow().upgrade(),
-            Node::Leaf{ parent, ..} => parent.borrow().upgrade(),
+            Node::Node { parent, .. } => parent.borrow().upgrade(),
+            Node::Leaf { parent, .. } => parent.borrow().upgrade(),
             _ => None,
         }
     }
@@ -183,7 +212,9 @@ mod tests {
 
     #[test]
     fn test_merkle_root() {
-        let expected_hash = hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc").unwrap();
+        let expected_hash =
+            hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
+                .unwrap();
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
 
         let mut hashes: Vec<[u8; 32]> = vec![];
@@ -199,7 +230,9 @@ mod tests {
 
     #[test]
     fn test_proofs_0() {
-        let expected_hash = hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc").unwrap();
+        let expected_hash =
+            hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
+                .unwrap();
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
@@ -221,10 +254,11 @@ mod tests {
         assert_eq!(&root, expected_root);
     }
 
-
     #[test]
     fn test_proofs_1() {
-        let expected_hash = hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc").unwrap();
+        let expected_hash =
+            hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
+                .unwrap();
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
@@ -248,7 +282,9 @@ mod tests {
 
     #[test]
     fn test_proofs_2() {
-        let expected_hash = hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc").unwrap();
+        let expected_hash =
+            hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
+                .unwrap();
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
@@ -272,7 +308,9 @@ mod tests {
 
     #[test]
     fn test_proofs_3() {
-        let expected_hash = hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc").unwrap();
+        let expected_hash =
+            hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
+                .unwrap();
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
@@ -297,7 +335,9 @@ mod tests {
     #[test]
     fn test_root_other_set() {
         // Test from https://github.com/olivmath/merkly/blob/main/test/merkle_root/test_merkle_root.py#L99
-        let expected_hash = hex::decode("14ede5e8e97ad9372327728f5099b95604a39593cac3bd38a343ad76205213e7").unwrap();
+        let expected_hash =
+            hex::decode("14ede5e8e97ad9372327728f5099b95604a39593cac3bd38a343ad76205213e7")
+                .unwrap();
         let contents = vec!["a", "b", "c", "d"];
 
         let mut hashes: Vec<[u8; 32]> = vec![];
@@ -313,7 +353,9 @@ mod tests {
 
     #[test]
     fn test_root_other_set_1() {
-        let expected_hash = hex::decode("e5a01fee14e0ed5c48714f22180f25ad8365b53f9779f79dc4a3d7e93963f94a").unwrap();
+        let expected_hash =
+            hex::decode("e5a01fee14e0ed5c48714f22180f25ad8365b53f9779f79dc4a3d7e93963f94a")
+                .unwrap();
         let contents = vec!["a", "b"];
 
         let mut hashes: Vec<[u8; 32]> = vec![];
@@ -323,7 +365,7 @@ mod tests {
         }
 
         let mtree = MerkleTree::new(hashes);
-        
+
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
 
@@ -339,14 +381,16 @@ mod tests {
     //     }
 
     //     let mtree = MerkleTree::new(hashes);
-        
+
     //     assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     // }
 
     #[test]
     fn test_root_other_set_3() {
         // test from https://github.com/merkletreejs/merkletreejs/blob/master/test/MerkleTree.test.js#L188
-        let expected_hash = hex::decode("44205acec5156114821f1f71d87c72e0de395633cd1589def6d4444cc79f8103").unwrap();
+        let expected_hash =
+            hex::decode("44205acec5156114821f1f71d87c72e0de395633cd1589def6d4444cc79f8103")
+                .unwrap();
         let contents = vec!["a", "b", "c", "d", "e", "f"];
 
         let mut hashes: Vec<[u8; 32]> = vec![];
@@ -356,14 +400,16 @@ mod tests {
         }
 
         let mtree = MerkleTree::new(hashes);
-        
+
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
 
     #[test]
     fn test_root_other_set_4() {
         // test from https://github.com/merkletreejs/merkletreejs/blob/master/test/MerkleTree.test.js#L218
-        let expected_hash = hex::decode("d31a37ef6ac14a2db1470c4316beb5592e6afd4465022339adafda76a18ffabe").unwrap();
+        let expected_hash =
+            hex::decode("d31a37ef6ac14a2db1470c4316beb5592e6afd4465022339adafda76a18ffabe")
+                .unwrap();
         let contents = vec!["a", "b", "c"];
 
         let mut hashes: Vec<[u8; 32]> = vec![];
@@ -373,7 +419,7 @@ mod tests {
         }
 
         let mtree = MerkleTree::new(hashes);
-        
+
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
 }
