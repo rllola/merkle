@@ -46,9 +46,26 @@ fn bench_generate_proof(c: &mut Criterion) {
     }));
 }
 
+fn bench_create_merkle_tree_1234(c: &mut Criterion) {
+    c.bench_function("create merkle tree - 1234", |b| b.iter(|| {
+        let contents = black_box(vec!["one", "two", "three", "four"]);
+
+        let mut hashes: Vec<[u8; 32]> = vec![];
+        for data in contents {
+            let hash = Hash::hash(data.as_bytes());
+            hashes.push(hash);
+        }
+
+        let _mtree = MerkleTree::new(hashes);
+        // let _root = mtree.root_hash();
+    }));
+}
+
+
 criterion_group!(
     benches,
     bench_create_merkle_tree,
     bench_generate_proof,
+    bench_create_merkle_tree_1234,
 );
 criterion_main!(benches);

@@ -121,7 +121,6 @@ impl MerkleTree {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub enum Node {
     Empty,
