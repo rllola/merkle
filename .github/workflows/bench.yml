@@ -1,0 +1,31 @@
+name: Benchmarking
+
+# Not running because this file is not on the default branch
+# on:
+#   workflow_run:
+#     workflows: [Run tests]
+#     types:
+#       - completed
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Run benchmarck (baseline)
+        run: cargo bench
+      - uses: actions/checkout@v4
+        with:
+          clean: false
+      - name: Run benchmarck (changes)
+        run: cargo bench | tee output.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: result
+          path: output.txt
