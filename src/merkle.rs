@@ -1,8 +1,9 @@
-use hmac_sha256::Hash;
+// use hmac_sha256::Hash;
 use std::cell::RefCell;
 use std::error::Error;
 use std::rc::Rc;
 use std::rc::Weak;
+use sha2::{Sha256, Digest};
 
 pub struct MerkleTree {
     root: Rc<Node>,
@@ -41,7 +42,7 @@ impl MerkleTree {
             if i + 1 >= items.len() {
                 // if we have an odd number of nodes we duplicate the last one to calculate the hash
                 let hash =
-                    Hash::hash(&[items[i].hash().to_vec(), items[i].hash().to_vec()].concat());
+                    Sha256::digest(&[items[i].hash().to_vec(), items[i].hash().to_vec()].concat()).into();
                 let left = Rc::clone(&items[i]);
                 let right = Rc::new(Node::Empty);
 
@@ -56,7 +57,7 @@ impl MerkleTree {
                 items[i].set_parent(&n);
             } else {
                 let hash =
-                    Hash::hash(&[items[i].hash().to_vec(), items[i + 1].hash().to_vec()].concat());
+                    Sha256::digest(&[items[i].hash().to_vec(), items[i + 1].hash().to_vec()].concat()).into();
                 let left = Rc::clone(&items[i]);
                 let right = Rc::clone(&items[i + 1]);
 
@@ -130,13 +131,13 @@ impl MerkleTree {
     }
 
     pub fn verify(data: Vec<u8>, proofs: Vec<([u8; 32], u8)>) -> [u8; 32] {
-        let mut hash = Hash::hash(&data);
+        let mut hash = Sha256::digest(&data).into();
 
         for proof in proofs {
             if proof.1 == 1 {
-                hash = Hash::hash(&[hash, proof.0].concat());
+                hash = Sha256::digest(&[hash, proof.0].concat()).into();
             } else {
-                hash = Hash::hash(&[proof.0, hash].concat());
+                hash = Sha256::digest(&[proof.0, hash].concat()).into();
             }
         }
 
@@ -206,7 +207,8 @@ impl Node {
 }
 #[cfg(test)]
 mod tests {
-    use hmac_sha256::Hash;
+    // use hmac_sha256::Hash;
+    use sha2::{Sha256, Digest};
 
     use super::MerkleTree;
 
@@ -219,7 +221,7 @@ mod tests {
 
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -236,7 +238,7 @@ mod tests {
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -262,7 +264,7 @@ mod tests {
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -288,7 +290,7 @@ mod tests {
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -314,7 +316,7 @@ mod tests {
         let contents = vec!["Hello", "Hi", "Hey", "Hola"];
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in &contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -342,7 +344,7 @@ mod tests {
 
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -360,7 +362,7 @@ mod tests {
 
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -376,7 +378,7 @@ mod tests {
 
     //     let mut hashes: Vec<[u8; 32]> = vec![];
     //     for data in contents {
-    //         let hash = Hash::hash(data.as_bytes());
+    //         let hash = Sha256::digest(data.as_bytes());
     //         hashes.push(hash);
     //     }
 
@@ -395,7 +397,7 @@ mod tests {
 
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
@@ -414,7 +416,7 @@ mod tests {
 
         let mut hashes: Vec<[u8; 32]> = vec![];
         for data in contents {
-            let hash = Hash::hash(data.as_bytes());
+            let hash = Sha256::digest(data.as_bytes()).into();
             hashes.push(hash);
         }
 
