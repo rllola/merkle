@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use sha2::{Sha256, Digest};
 use merkle::merkle::MerkleTree;
 use rand::RngCore;
+use sha2::{Digest, Sha256};
 
 fn bench_create_merkle_tree(c: &mut Criterion) {
     c.bench_function("create merkle tree and calculate root", |b| {
@@ -81,7 +81,6 @@ fn bench_generate_proof_1234(c: &mut Criterion) {
                 let hash = black_box(value).clone();
                 let _proofs = mtree.generate_proofs(hash).unwrap();
             }
-
         })
     });
 }

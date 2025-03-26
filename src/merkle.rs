@@ -1,9 +1,9 @@
 // use hmac_sha256::Hash;
+use sha2::{Digest, Sha256};
 use std::cell::RefCell;
 use std::error::Error;
 use std::rc::Rc;
 use std::rc::Weak;
-use sha2::{Sha256, Digest};
 
 pub struct MerkleTree {
     root: Rc<Node>,
@@ -42,7 +42,8 @@ impl MerkleTree {
             if i + 1 >= items.len() {
                 // if we have an odd number of nodes we duplicate the last one to calculate the hash
                 let hash =
-                    Sha256::digest(&[items[i].hash().to_vec(), items[i].hash().to_vec()].concat()).into();
+                    Sha256::digest(&[items[i].hash().to_vec(), items[i].hash().to_vec()].concat())
+                        .into();
                 let left = Rc::clone(&items[i]);
                 let right = Rc::new(Node::Empty);
 
@@ -56,8 +57,10 @@ impl MerkleTree {
                 // update parent nodes
                 items[i].set_parent(&n);
             } else {
-                let hash =
-                    Sha256::digest(&[items[i].hash().to_vec(), items[i + 1].hash().to_vec()].concat()).into();
+                let hash = Sha256::digest(
+                    &[items[i].hash().to_vec(), items[i + 1].hash().to_vec()].concat(),
+                )
+                .into();
                 let left = Rc::clone(&items[i]);
                 let right = Rc::clone(&items[i + 1]);
 
@@ -208,7 +211,7 @@ impl Node {
 #[cfg(test)]
 mod tests {
     // use hmac_sha256::Hash;
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
 
     use super::MerkleTree;
 

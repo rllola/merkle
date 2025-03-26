@@ -1,5 +1,5 @@
 use merkle::merkle::MerkleTree;
-use sha2::{Sha256, Digest};
+use sha2::{Digest, Sha256};
 
 fn main() {
     let contents = vec!["Hello", "Hi", "Hey", "Hola"];
@@ -11,5 +11,4 @@ fn main() {
     }
 
     let _mtree = MerkleTree::new(hashes);
-
 }
