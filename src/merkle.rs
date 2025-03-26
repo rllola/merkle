@@ -1,4 +1,3 @@
-// use hmac_sha256::Hash;
 use sha2::{Digest, Sha256};
 use std::cell::RefCell;
 use std::error::Error;
