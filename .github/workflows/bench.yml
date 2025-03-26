@@ -13,10 +13,12 @@ jobs:
           ref: main
       - name: Run benchmarck (baseline)
         run: cargo bench
-      - run: ls target
       - uses: actions/checkout@v4
         with:
           clean: false
-      - run: ls target
       - name: Run benchmarck (changes)
-        run: cargo bench
+        run: cargo bench | tee output.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: result
+          path: output.txt
