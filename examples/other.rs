@@ -21,5 +21,4 @@ fn main() {
     let _mtree = MerkleTree::from_vec(DIGEST, contents);
 
     println!("Time elapsed : {:?}", start.elapsed());
-
 }

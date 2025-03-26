@@ -1,13 +1,13 @@
 use merkle::merkle::MerkleTree;
-use sha2::{Digest, Sha256};
 use rand::RngCore;
+use sha2::{Digest, Sha256};
 
 #[global_allocator]
 static ALLOC: dhat::Alloc = dhat::Alloc;
 
 fn main() {
     let _profiler = dhat::Profiler::new_heap();
-    
+
     let mut contents = vec![vec![0u8; 256]; 160];
     let mut rng = rand::rng();
 
