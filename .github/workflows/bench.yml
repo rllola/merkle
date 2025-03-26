@@ -2,7 +2,7 @@ name: Benchmarking
 
 on:
   workflow_run:
-    workflows: ["Run tests"]
+    workflows: [Run tests]
     types:
       - completed
 
