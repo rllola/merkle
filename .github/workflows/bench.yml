@@ -8,18 +8,11 @@ jobs:
   bench:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Download benchmark data
-        continue-on-error: true
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
         with:
-          name: bench
-          path: target/criterion
-      - name: Run benchmarck
+          ref: main
+      - name: Run benchmarck (baseline)
         run: cargo bench
-      - name: Upload benchmark data
-        uses: actions/upload-artifact@v4
-        with:
-          name: bench
-          path: target/criterion
-          overwrite: true
+      - uses: actions/checkout@v4
+      - name: Run benchmarck (changes)
+        run: cargo bench
