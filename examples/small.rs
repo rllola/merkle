@@ -7,7 +7,12 @@ static ALLOC: dhat::Alloc = dhat::Alloc;
 fn main() {
     let _profiler = dhat::Profiler::new_heap();
 
-    let contents = vec!["Hello".as_bytes(), "Hi".as_bytes(), "Hey".as_bytes(), "Hola".as_bytes()];
+    let contents = vec![
+        "Hello".as_bytes(),
+        "Hi".as_bytes(),
+        "Hey".as_bytes(),
+        "Hola".as_bytes(),
+    ];
 
     let mtree = MerkleTree::new(&contents);
 
