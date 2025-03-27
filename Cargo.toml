@@ -3,6 +3,9 @@ name = "merkle"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+bench = false
+
 [dependencies]
 hex = "0.4.3"
 sha2 = "0.10.8"
@@ -10,6 +13,7 @@ sha2 = "0.10.8"
 [dev-dependencies]
 criterion = "0.5"
 rand = "0.9.0"
+
 # example
 dhat = "0.3.3"
 merkle-other = { version = "1.11.0", package = "merkle" }

@@ -7,13 +7,17 @@ static ALLOC: dhat::Alloc = dhat::Alloc;
 fn main() {
     let _profiler = dhat::Profiler::new_heap();
 
-    let contents = vec!["Hello", "Hi", "Hey", "Hola"];
+    let contents = vec![
+        "Hello".as_bytes(),
+        "Hi".as_bytes(),
+        "Hey".as_bytes(),
+        "Hola".as_bytes(),
+    ];
 
-    let mut hashes: Vec<[u8; 32]> = vec![];
-    for data in contents {
-        let hash = Sha256::digest(data.as_bytes()).into();
-        hashes.push(hash);
+    let mtree = MerkleTree::new(&contents);
+
+    for value in &contents {
+        let hash = Sha256::digest(value).into();
+        let _proofs = mtree.generate_proofs(hash).unwrap();
     }
-
-    let _mtree = MerkleTree::new(hashes);
 }
