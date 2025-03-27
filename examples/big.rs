@@ -1,6 +1,5 @@
 use merkle::merkle::MerkleTree;
 use rand::RngCore;
-use sha2::{Digest, Sha256};
 
 #[global_allocator]
 static ALLOC: dhat::Alloc = dhat::Alloc;
@@ -8,18 +7,12 @@ static ALLOC: dhat::Alloc = dhat::Alloc;
 fn main() {
     let _profiler = dhat::Profiler::new_heap();
 
-    let mut contents = vec![vec![0u8; 256]; 160];
+    let mut contents: Vec<&[u8]> = vec![&[0u8; 256]; 160];
     let mut rng = rand::rng();
 
-    for mut v in &mut contents {
-        rng.fill_bytes(&mut v);
+    for v in &mut contents {
+        rng.fill_bytes(&mut v.to_owned());
     }
 
-    let mut hashes: Vec<[u8; 32]> = vec![];
-    for data in &contents {
-        let hash = Sha256::digest(data).into();
-        hashes.push(hash);
-    }
-
-    let _mtree = MerkleTree::new(hashes);
+    let _mtree = MerkleTree::new(&contents);
 }

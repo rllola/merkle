@@ -10,10 +10,11 @@ pub struct MerkleTree {
 }
 
 impl MerkleTree {
-    pub fn new(leaves: Vec<[u8; 32]>) -> Self {
-        let nodes: Vec<Rc<Node>> = leaves
+    pub fn new(values: &Vec<&[u8]>) -> Self {
+        let nodes: Vec<Rc<Node>> = values
             .into_iter()
-            .map(|hash| {
+            .map(|value| {
+                let hash = Sha256::digest(value).into();
                 Rc::new(Node::Leaf {
                     hash,
                     parent: RefCell::new(Weak::new()),
@@ -219,15 +220,9 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
+        let contents = vec!["Hello".as_bytes(), "Hi".as_bytes(), "Hey".as_bytes(), "Hola".as_bytes()];
 
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
-
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
@@ -237,23 +232,19 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in &contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
+        let contents = vec!["Hello".as_bytes(), "Hi".as_bytes(), "Hey".as_bytes(), "Hola".as_bytes()];
 
-        let first = hashes.first().unwrap().clone();
+        let first = contents.first().unwrap();
+        let hash = Sha256::digest(&first).into();
 
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
-        let proofs = mtree.generate_proofs(first).unwrap();
+        let proofs = mtree.generate_proofs(hash).unwrap();
         let expected_root = mtree.root_hash();
 
         assert_eq!(expected_root.to_vec(), expected_hash);
 
-        let root = MerkleTree::verify(contents[0].as_bytes().to_vec(), proofs);
+        let root = MerkleTree::verify(first.to_vec(), proofs);
 
         assert_eq!(&root, expected_root);
     }
@@ -263,23 +254,19 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in &contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
+        let contents = vec!["Hello".as_bytes(), "Hi".as_bytes(), "Hey".as_bytes(), "Hola".as_bytes()];
 
-        let second = hashes[1].clone();
+        let second = contents[1];
+        let hash = Sha256::digest(&second).into();
 
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
-        let proofs = mtree.generate_proofs(second).unwrap();
+        let proofs = mtree.generate_proofs(hash).unwrap();
         let expected_root = mtree.root_hash();
 
         assert_eq!(expected_root.to_vec(), expected_hash);
 
-        let root = MerkleTree::verify(contents[1].as_bytes().to_vec(), proofs);
+        let root = MerkleTree::verify(second.to_vec(), proofs);
 
         assert_eq!(&root, expected_root);
     }
@@ -289,23 +276,19 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in &contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
+        let contents = vec!["Hello".as_bytes(), "Hi".as_bytes(), "Hey".as_bytes(), "Hola".as_bytes()];
 
-        let third = hashes[2].clone();
+        let third = contents[1];
+        let hash = Sha256::digest(&third).into();
 
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
-        let proofs = mtree.generate_proofs(third).unwrap();
+        let proofs = mtree.generate_proofs(hash).unwrap();
         let expected_root = mtree.root_hash();
 
         assert_eq!(expected_root.to_vec(), expected_hash);
 
-        let root = MerkleTree::verify(contents[2].as_bytes().to_vec(), proofs);
+        let root = MerkleTree::verify(third.to_vec(), proofs);
 
         assert_eq!(&root, expected_root);
     }
@@ -315,23 +298,19 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in &contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
+        let contents = vec!["Hello".as_bytes(), "Hi".as_bytes(), "Hey".as_bytes(), "Hola".as_bytes()];
 
-        let last = hashes.last().unwrap().clone();
+        let last = contents.last().unwrap();
+        let hash = Sha256::digest(&last).into();
 
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
-        let proofs = mtree.generate_proofs(last).unwrap();
+        let proofs = mtree.generate_proofs(hash).unwrap();
         let expected_root = mtree.root_hash();
 
         assert_eq!(expected_root.to_vec(), expected_hash);
 
-        let root = MerkleTree::verify(contents[3].as_bytes().to_vec(), proofs);
+        let root = MerkleTree::verify(last.to_vec(), proofs);
 
         assert_eq!(&root, expected_root);
     }
@@ -342,15 +321,9 @@ mod tests {
         let expected_hash =
             hex::decode("14ede5e8e97ad9372327728f5099b95604a39593cac3bd38a343ad76205213e7")
                 .unwrap();
-        let contents = vec!["a", "b", "c", "d"];
+        let contents = vec!["a".as_bytes(), "b".as_bytes(), "c".as_bytes(), "d".as_bytes()];
 
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
-
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
@@ -360,15 +333,9 @@ mod tests {
         let expected_hash =
             hex::decode("e5a01fee14e0ed5c48714f22180f25ad8365b53f9779f79dc4a3d7e93963f94a")
                 .unwrap();
-        let contents = vec!["a", "b"];
+        let contents = vec!["a".as_bytes(), "b".as_bytes()];
 
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
-
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
@@ -395,15 +362,9 @@ mod tests {
         let expected_hash =
             hex::decode("44205acec5156114821f1f71d87c72e0de395633cd1589def6d4444cc79f8103")
                 .unwrap();
-        let contents = vec!["a", "b", "c", "d", "e", "f"];
+        let contents = vec!["a".as_bytes(), "b".as_bytes(), "c".as_bytes(), "d".as_bytes(), "e".as_bytes(), "f".as_bytes()];
 
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
-
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
@@ -414,15 +375,9 @@ mod tests {
         let expected_hash =
             hex::decode("d31a37ef6ac14a2db1470c4316beb5592e6afd4465022339adafda76a18ffabe")
                 .unwrap();
-        let contents = vec!["a", "b", "c"];
+        let contents = vec!["a".as_bytes(), "b".as_bytes(), "c".as_bytes()];
 
-        let mut hashes: Vec<[u8; 32]> = vec![];
-        for data in contents {
-            let hash = Sha256::digest(data.as_bytes()).into();
-            hashes.push(hash);
-        }
-
-        let mtree = MerkleTree::new(hashes);
+        let mtree = MerkleTree::new(&contents);
 
         assert_eq!(mtree.root_hash().to_vec(), expected_hash);
     }
