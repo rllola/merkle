@@ -13,6 +13,7 @@ fn main() {
 
     for value in &contents {
         let hash = Sha256::digest(value).into();
+        dbg!(hex::encode(&hash));
         let _proofs = mtree.generate_proofs(hash).unwrap();
     }
 }

@@ -10,21 +10,20 @@ This is an implementation of a merkle tree in Rust. It uses sha256 for hashing.
 
 ```
 create merkle tree - big
-                        time:   [439.61 µs 441.34 µs 443.25 µs]
-                        change: [-2.0798% -0.8046% +0.5165%] (p = 0.23 > 0.05)
-                        No change in performance detected.
-Found 11 outliers among 100 measurements (11.00%)
-  7 (7.00%) high mild
-  4 (4.00%) high severe
+                        time:   [402.52 µs 403.71 µs 405.01 µs]
+                        change: [+0.4355% +0.9470% +1.5179%] (p = 0.00 < 0.05)
+                        Change within noise threshold.
+Found 6 outliers among 100 measurements (6.00%)
+  4 (4.00%) high mild
+  2 (2.00%) high severe
 
 generate merkle proof - big
-                        time:   [143.74 µs 145.06 µs 146.50 µs]
-                        change: [-8.6987% -6.2184% -3.7437%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 7 outliers among 100 measurements (7.00%)
-  2 (2.00%) low mild
-  4 (4.00%) high mild
-  1 (1.00%) high severe
+                        time:   [335.80 µs 336.19 µs 336.60 µs]
+                        change: [-0.0793% +0.2623% +0.6097%] (p = 0.14 > 0.05)
+                        No change in performance detected.
+Found 4 outliers among 100 measurements (4.00%)
+  2 (2.00%) high mild
+  2 (2.00%) high severe
 ```
 
 ```

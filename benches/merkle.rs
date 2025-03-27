@@ -55,8 +55,8 @@ fn bench_generate_proof_1234(c: &mut Criterion) {
 
         b.iter(|| {
             for value in &tmp {
-                let hash = Sha256::digest(black_box(value)).into();
-                let _proofs = mtree.generate_proofs(hash).unwrap();
+                let hash = Sha256::digest(value).into();
+                let _proofs = mtree.generate_proofs(black_box(hash)).unwrap();
             }
         })
     });
@@ -85,13 +85,12 @@ fn bench_generate_proof_big(c: &mut Criterion) {
         for v in &mut contents {
             rng.fill_bytes(&mut v.to_owned());
         }
-        let tmp = contents.clone();
         let mtree = MerkleTree::new(&contents);
 
         b.iter(|| {
-            for value in &tmp {
-                let hash = Sha256::digest(black_box(value)).into();
-                let _proofs = mtree.generate_proofs(hash).unwrap();
+            for value in &contents {
+                let hash = Sha256::digest(value).into();
+                let _proofs = mtree.generate_proofs(black_box(hash)).unwrap();
             }
         })
     });
