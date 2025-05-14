@@ -220,12 +220,7 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec![
-            "Hello",
-            "Hi",
-            "Hey",
-            "Hola",
-        ];
+        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
 
         let mtree = MerkleTree::new(&contents);
 
@@ -237,12 +232,7 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec![
-            "Hello",
-            "Hi",
-            "Hey",
-            "Hola",
-        ];
+        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
 
         let first = contents.first().unwrap().as_bytes();
         let hash = Sha256::digest(&first);
@@ -264,12 +254,7 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec![
-            "Hello",
-            "Hi",
-            "Hey",
-            "Hola",
-        ];
+        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
 
         let second = contents[1].as_bytes();
         let hash = Sha256::digest(&second);
@@ -291,12 +276,7 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec![
-            "Hello",
-            "Hi",
-            "Hey",
-            "Hola",
-        ];
+        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
 
         let third = contents[1].as_bytes();
         let hash = Sha256::digest(&third);
@@ -318,12 +298,7 @@ mod tests {
         let expected_hash =
             hex::decode("5f30cc80133b9394156e24b233f0c4be32b24e44bb3381f02c7ba52619d0febc")
                 .unwrap();
-        let contents = vec![
-            "Hello",
-            "Hi",
-            "Hey",
-            "Hola",
-        ];
+        let contents = vec!["Hello", "Hi", "Hey", "Hola"];
 
         let last = contents.last().unwrap().as_bytes();
         let hash = Sha256::digest(&last);
@@ -346,12 +321,7 @@ mod tests {
         let expected_hash =
             hex::decode("14ede5e8e97ad9372327728f5099b95604a39593cac3bd38a343ad76205213e7")
                 .unwrap();
-        let contents = vec![
-            "a",
-            "b",
-            "c",
-            "d",
-        ];
+        let contents = vec!["a", "b", "c", "d"];
 
         let mtree = MerkleTree::new(&contents);
 
@@ -392,14 +362,7 @@ mod tests {
         let expected_hash =
             hex::decode("44205acec5156114821f1f71d87c72e0de395633cd1589def6d4444cc79f8103")
                 .unwrap();
-        let contents = vec![
-            "a",
-            "b",
-            "c",
-            "d",
-            "e",
-            "f",
-        ];
+        let contents = vec!["a", "b", "c", "d", "e", "f"];
 
         let mtree = MerkleTree::new(&contents);
 
@@ -421,11 +384,14 @@ mod tests {
 
     #[test]
     fn test_root_other_type_1() {
-
         let expected_hash =
             hex::decode("730bfd8698fb0a82b889ea2b6535d9a6e8446c3aee9a8c09420e2f761edeab0b")
                 .unwrap();
-        let contents: Vec<[u8; 4]> = vec![1_i32.to_le_bytes(), 2_i32.to_le_bytes(), 3_i32.to_le_bytes()];
+        let contents: Vec<[u8; 4]> = vec![
+            1_i32.to_le_bytes(),
+            2_i32.to_le_bytes(),
+            3_i32.to_le_bytes(),
+        ];
 
         let mtree = MerkleTree::new(&contents);
 
