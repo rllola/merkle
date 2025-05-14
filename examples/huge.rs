@@ -1,4 +1,4 @@
-use merkle::merkle::MerkleTree;
+use merkle::MerkleTree;
 use rand::RngCore;
 use std::time::Instant;
 
